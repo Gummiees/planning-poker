@@ -1,0 +1,49 @@
+{
+  "extends": [
+    "stylelint-config-prettier",
+    "stylelint-config-standard",
+    "stylelint-config-standard-scss"
+  ],
+  "plugins": ["stylelint-scss"],
+  "rules": {
+    "declaration-block-trailing-semicolon": null,
+    "no-descending-specificity": null,
+    "value-no-vendor-prefix": [
+      true,
+      {
+        "disableFix": true
+      }
+    ],
+    "string-quotes": "single",
+    "function-name-case": [
+      "lower",
+      {
+        "ignoreFunctions": ["/^(get|combine)[a-zA-Z]*$/"]
+      }
+    ],
+    "selector-class-pattern": [
+      "^([a-z]+(__|-{1,2}))*[a-z]+$",
+      {
+        "resolveNestedSelectors": true
+      }
+    ],
+    "scss/at-rule-no-unknown": [
+      true,
+      {
+        "ignoreAtRules": [
+          "tailwind",
+          "apply",
+          "variants",
+          "responsive",
+          "screen",
+          "function",
+          "if",
+          "each",
+          "include",
+          "mixin"
+        ]
+      }
+    ],
+    "scss/at-function-pattern": "[a-zA-Z]+"
+  }
+}
