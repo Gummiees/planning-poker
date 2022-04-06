@@ -1,0 +1,35 @@
+<div class="bg-white p-8 w-min rounded-md drop-shadow-lg">
+  <form [formGroup]="form">
+    <div class="flex items-center justify-center flex-col gap-4">
+      <div>
+        <mat-form-field appearance="outline">
+          <mat-label>Name</mat-label>
+          <input type="text" matInput required formControlName="name" name="name" autocomplete="nickname" maxlength="20" />
+          <mat-hint>No registration needed!</mat-hint>
+        </mat-form-field>
+      </div>
+      <div
+      class="w-full">
+        <button
+          mat-raised-button
+          color="primary"
+          loader
+          [disabled]="form.invalid || isProcessing"
+          type="submit"
+          tabIndex="0"
+          class="w-full"
+          (click)="sendForm()"
+        >
+          <div class="flex items-center justify-between gap-2">
+            <div>Start</div>
+            <mat-progress-spinner
+              *ngIf="isProcessing"
+              mode="indeterminate"
+              diameter="20"
+            ></mat-progress-spinner>
+          </div>
+        </button>
+      </div>
+    </div>
+  </form>
+  </div>
