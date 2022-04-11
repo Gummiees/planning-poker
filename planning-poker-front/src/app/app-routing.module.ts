@@ -7,7 +7,7 @@ const routes: Routes = [
     loadChildren: async () => import('./landing-page/landing.module').then((m) => m.LandingModule),
   },
   {
-    path: 'room/:uuid',
+    path: 'room/:room-name',
     loadChildren: async () => import('./join-game/join-game.module').then((m) => m.JoinGameModule),
   },
   { path: '**', redirectTo: '/home', pathMatch: 'full' },

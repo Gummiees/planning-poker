@@ -21,9 +21,6 @@
         "prettier",
         "plugin:sonarjs/recommended"
       ],
-      "plugins": [
-        "eslint-plugin-no-null"
-      ],
       "rules": {
         "@typescript-eslint/array-type": [
           "error",
@@ -145,7 +142,6 @@
         "max-len": "off",
         "no-empty": "error",
         "no-invalid-this": "error",
-        "no-null/no-null": "off",
         "no-return-await": "error",
         "object-shorthand": "off",
         "no-underscore-dangle": "off"

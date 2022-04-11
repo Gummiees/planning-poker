@@ -1,34 +1,40 @@
-import { Component, OnInit } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { JoinGameService } from '../join-game.service';
 
 @Component({
   selector: 'app-join-game',
   templateUrl: './join-game.component.html',
 })
-export class JoinGameComponent implements OnInit {
-  public form: FormGroup;
-  public isProcessing = false;
-  public uuid?: string;
+export class JoinGameComponent implements OnInit, OnDestroy {
+  public roomName?: string;
+  public isReadyToPlay = false;
 
-  public constructor(private readonly route: ActivatedRoute) {
-    this.form = new FormGroup({
-      name: new FormControl('', [Validators.required, Validators.maxLength(20)]),
+  private readonly subscription?: Subscription;
+
+  public constructor(
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+    private readonly joinGameService: JoinGameService,
+  ) {
+    this.subscription = this.joinGameService.joinGame$.subscribe((game) => {
+      if (!game) {
+        this.isReadyToPlay = false;
+      } else {
+        this.isReadyToPlay = true;
+      }
     });
   }
 
   public ngOnInit(): void {
-    this.uuid = this.route.snapshot.paramMap.get('uuid') ?? '';
+    this.roomName = this.route.snapshot.paramMap.get('room-name') ?? '';
+    if (!this.roomName) {
+      void this.router.navigate(['/']);
+    }
   }
 
-  public sendForm() {
-    if (this.form.valid) {
-      this.isProcessing = true;
-      this.form.disable();
-      setTimeout(() => {
-        this.form.enable();
-        this.isProcessing = false;
-      }, 3000);
-    }
+  public ngOnDestroy(): void {
+    this.subscription?.unsubscribe();
   }
 }
