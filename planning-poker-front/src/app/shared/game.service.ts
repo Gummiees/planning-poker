@@ -1,8 +1,8 @@
 import { Injectable } from '@angular/core';
 import { Router } from '@angular/router';
 import { CookieService } from 'ngx-cookie-service';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { COOKIE_NAME, Game } from '../join-game/game.model';
+import { BehaviorSubject, filter, map, Observable, Subscription } from 'rxjs';
+import { COOKIE_NAME, Game, PlayerJoined } from '../join-game/game.model';
 import { IoSocketService } from './io-socket.service';
 
 @Injectable({
@@ -11,6 +11,8 @@ import { IoSocketService } from './io-socket.service';
 export class GameService {
   private currentGame: Game | null = null;
   private readonly _joinGame$ = new BehaviorSubject<Game | null>(this.currentGame);
+
+  private subscription?: Subscription;
 
   public constructor(
     private readonly ioSocketService: IoSocketService,
@@ -29,25 +31,27 @@ export class GameService {
 
   public async joinGame(game: Game) {
     try {
-      game.players = await this.ioSocketService.joinRoom(game.roomName, game.username);
+      game.players = await this.ioSocketService.joinRoom(game.room, game.username);
+      game.isHost = false;
+      this.listenForPlayers();
       this.setCurrentGame(game);
-      this._joinGame$.next(game);
     } catch (e) {
       throw e;
     }
   }
 
   public async createGame(username: string) {
-    const roomName = await this.ioSocketService.createRoom(username);
+    const room = await this.ioSocketService.createRoom(username);
     const game: Game = {
       username,
-      roomName,
+      room,
+      isHost: true,
       players: [username],
     };
 
+    this.listenForPlayers();
     this.setCurrentGame(game);
-    this._joinGame$.next(game);
-    await this.router.navigate(['room', game.roomName]);
+    await this.router.navigate(['room', game.room]);
   }
 
   public async doesGameExist(room: string): Promise<boolean> {
@@ -59,14 +63,36 @@ export class GameService {
     this._joinGame$.next(null);
     this.cookieService.set(COOKIE_NAME, '');
     this.ioSocketService.disconnect();
+    this.subscription?.unsubscribe();
+  }
+
+  private listenForPlayers() {
+    this.subscription = this.ioSocketService
+      .playerJoinedRoom()
+      .pipe(
+        filter((playerJoined: PlayerJoined) => playerJoined.room === this.currentGame?.room),
+        map((playerJoined: PlayerJoined) => playerJoined.player),
+      )
+      .subscribe((username: string) => {
+        if (this.currentGame) {
+          this.currentGame.players?.push(username);
+          this._joinGame$.next(this.currentGame);
+        }
+      });
   }
 
   private setCurrentGame(game: Game) {
-    if (!this.isCookieSameRoomName(game)) {
+    if (!this.isCookieSameRoom(game)) {
+      if (this.doesCookieExist()) {
+        this.cookieService.set(COOKIE_NAME, '');
+      }
       this.cookieService.set(COOKIE_NAME, JSON.stringify(game));
     }
-
+    if (!game.players) {
+      game.players = [];
+    }
     this.currentGame = game;
+    this._joinGame$.next(game);
   }
 
   private doesCookieExist(): boolean {
@@ -75,12 +101,12 @@ export class GameService {
     return !!cookieGame;
   }
 
-  private isCookieSameRoomName(game: Game | null): boolean {
+  private isCookieSameRoom(game: Game | null): boolean {
     if (!game || !this.doesCookieExist()) {
       return false;
     }
     const cookie = this.cookieService.get(COOKIE_NAME);
     const cookieGame = cookie ? JSON.parse(cookie) : null;
-    return cookieGame && cookieGame.roomName === game.roomName;
+    return cookieGame && cookieGame.room === game.room;
   }
 }

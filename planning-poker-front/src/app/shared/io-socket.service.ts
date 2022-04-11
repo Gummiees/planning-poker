@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { Observable } from 'rxjs';
 import * as io from 'socket.io-client';
+import { PlayerJoined } from '../join-game/game.model';
 import { ERROR_NOT_CONNECTED } from './errors';
 
 @Injectable({
@@ -9,13 +11,15 @@ import { ERROR_NOT_CONNECTED } from './errors';
 export class IoSocketService {
   public socket?: io.Socket;
 
+  public constructor(private readonly snackBar: MatSnackBar) {}
+
   public connect(username: string) {
     this.socket = io.connect('http://localhost:8080');
     this.socket.emit('username', username);
   }
 
   public disconnect() {
-    this.socket?.emit('disconnect');
+    this.socket?.disconnect();
   }
 
   public async createRoom(username: string): Promise<string> {
@@ -44,15 +48,15 @@ export class IoSocketService {
     });
   }
 
-  public something$(): Observable<Readonly<any>> {
+  public playerJoinedRoom(): Observable<Readonly<PlayerJoined>> {
     if (!this.socket) {
+      this.snackBar.open(ERROR_NOT_CONNECTED, 'Close');
       console.error(ERROR_NOT_CONNECTED);
       throw new Error(ERROR_NOT_CONNECTED);
     }
 
     return new Observable((observer) => {
-      this.socket?.on('actualPlayers', (data) => observer.next(data));
-      return () => this.socket?.disconnect();
+      this.socket?.on('playerJoinedRoom', (username) => observer.next(username));
     });
   }
 

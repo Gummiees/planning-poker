@@ -1,5 +1,6 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
+import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute } from '@angular/router';
 import { GameService } from '../../../shared/game.service';
 import { Game } from '../../game.model';
@@ -11,11 +12,12 @@ import { Game } from '../../game.model';
 export class JoinComponent implements OnInit {
   public form: FormGroup;
   public isProcessing = false;
-  @Input() public roomName?: string;
+  @Input() public room?: string;
 
   public constructor(
     private readonly route: ActivatedRoute,
     private readonly gameService: GameService,
+    private readonly snackBar: MatSnackBar,
   ) {
     this.form = new FormGroup({
       name: new FormControl('', [Validators.required, Validators.maxLength(20)]),
@@ -23,7 +25,7 @@ export class JoinComponent implements OnInit {
   }
 
   public ngOnInit(): void {
-    this.roomName = this.route.snapshot.paramMap.get('room-name') ?? '';
+    this.room = this.route.snapshot.paramMap.get('room-name') ?? '';
   }
 
   public async sendForm() {
@@ -31,12 +33,13 @@ export class JoinComponent implements OnInit {
       this.isProcessing = true;
       this.form.disable();
       const game: Game = {
-        roomName: this.roomName || '',
+        room: this.room || '',
         username: this.form.controls.name.value,
       };
       try {
         await this.gameService.joinGame(game);
       } catch (e) {
+        this.snackBar.open('Error joining the room', 'Close');
         console.error('Error joining the room', e);
         this.form.enable();
         this.isProcessing = false;
