@@ -1,8 +1,7 @@
 import { Component, OnDestroy } from '@angular/core';
-import { IoSocketService } from '@shared/io-socket.service';
+import { GameService } from '@shared/game.service';
 import { filter, Subscription } from 'rxjs';
 import { Game } from '../../game.model';
-import { JoinGameService } from '../../join-game.service';
 
 @Component({
   selector: 'app-game',
@@ -12,30 +11,21 @@ export class GameComponent implements OnDestroy {
   public isProcessing = false;
   public game: Game | null = null;
 
-  private readonly subscriptions: Subscription[] = [];
+  private readonly subscription?: Subscription;
 
-  public constructor(
-    private readonly ioSocketService: IoSocketService,
-    private readonly joinGameService: JoinGameService,
-  ) {
-    const joinGameSub = this.joinGameService.joinGame$
+  public constructor(private readonly gameService: GameService) {
+    this.subscription = this.gameService.joinGame$
       .pipe(filter((game) => !!game))
       .subscribe((game) => {
         this.game = game;
       });
-    this.ioSocketService.connect();
-    const ioSocketSub = this.ioSocketService
-      .something$()
-      .subscribe((what) => console.log('what', what));
-    this.subscriptions.push(joinGameSub);
-    this.subscriptions.push(ioSocketSub);
   }
 
   public ngOnDestroy(): void {
-    this.subscriptions.forEach((sub) => sub.unsubscribe());
+    this.subscription?.unsubscribe();
   }
 
   public exit() {
-    this.joinGameService.exitGame();
+    this.gameService.exitGame();
   }
 }

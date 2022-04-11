@@ -25,7 +25,21 @@ const io = require('socket.io')(server, {
   });
 
 //initializing framework
-var players = {};
+const players = {};
+const games = {};
+
+function getRandomNumber(max) {
+    return Math.floor(Math.random() * max);
+}
+
+function getRandomName() {
+    const totalCharacters = 5;
+    let number = getRandomNumber(10000).toString();
+    while(number.length < totalCharacters) {
+        number = "0" + number;
+    }
+    return number;
+}
 
 io.on('connection', (socket) => { //returns socket which is a piece of data that talks with server and client
     console.log("Someone has connected");
@@ -54,5 +68,14 @@ io.on('connection', (socket) => { //returns socket which is a piece of data that
         console.log("someone has disconnected");
         delete players[socket.id];
         socket.broadcast.emit('player_disconnect', socket.id);
+    });
+    
+    socket.on('createRoom',  () => {
+        console.log("someone has created a room");
+        const roomName = getRandomName();
+        games[roomName] = {
+            players: [socket.id],
+        };
+        socket.emit('roomCreated', roomName);
     });
 });

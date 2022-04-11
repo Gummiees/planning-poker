@@ -1,8 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
+import { GameService } from '../../../shared/game.service';
 import { Game } from '../../game.model';
-import { JoinGameService } from '../../join-game.service';
 
 @Component({
   selector: 'app-join',
@@ -15,7 +15,7 @@ export class JoinComponent implements OnInit {
 
   public constructor(
     private readonly route: ActivatedRoute,
-    private readonly joinGameService: JoinGameService,
+    private readonly gameService: GameService,
   ) {
     this.form = new FormGroup({
       name: new FormControl('', [Validators.required, Validators.maxLength(20)]),
@@ -32,11 +32,10 @@ export class JoinComponent implements OnInit {
       this.form.disable();
       setTimeout(() => {
         const cookie: Game = {
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          roomName: this.roomName!,
-          name: this.form.controls.name.value,
+          roomName: this.roomName || '',
+          username: this.form.controls.name.value,
         };
-        this.joinGameService.setGame(cookie);
+        this.gameService.joinGame(cookie);
         this.form.enable();
         this.isProcessing = false;
       }, 3000);

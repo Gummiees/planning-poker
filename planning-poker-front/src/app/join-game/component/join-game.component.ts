@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { JoinGameService } from '../join-game.service';
+import { GameService } from '../../shared/game.service';
 
 @Component({
   selector: 'app-join-game',
@@ -16,9 +16,9 @@ export class JoinGameComponent implements OnInit, OnDestroy {
   public constructor(
     private readonly route: ActivatedRoute,
     private readonly router: Router,
-    private readonly joinGameService: JoinGameService,
+    private readonly gameService: GameService,
   ) {
-    this.subscription = this.joinGameService.joinGame$.subscribe((game) => {
+    this.subscription = this.gameService.joinGame$.subscribe((game) => {
       if (!game) {
         this.isReadyToPlay = false;
       } else {
