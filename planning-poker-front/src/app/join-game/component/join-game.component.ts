@@ -27,10 +27,11 @@ export class JoinGameComponent implements OnInit, OnDestroy {
     });
   }
 
-  public ngOnInit(): void {
+  public async ngOnInit() {
     this.roomName = this.route.snapshot.paramMap.get('room-name') ?? '';
-    if (!this.roomName) {
-      void this.router.navigate(['/']);
+    if (!this.roomName || !(await this.gameService.doesGameExist(this.roomName))) {
+      // TODO: show error message 'Room does not exist'
+      await this.router.navigate(['/']);
     }
   }
 

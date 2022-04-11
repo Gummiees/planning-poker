@@ -26,19 +26,21 @@ export class JoinComponent implements OnInit {
     this.roomName = this.route.snapshot.paramMap.get('room-name') ?? '';
   }
 
-  public sendForm() {
+  public async sendForm() {
     if (this.form.valid) {
       this.isProcessing = true;
       this.form.disable();
-      setTimeout(() => {
-        const cookie: Game = {
-          roomName: this.roomName || '',
-          username: this.form.controls.name.value,
-        };
-        this.gameService.joinGame(cookie);
+      const game: Game = {
+        roomName: this.roomName || '',
+        username: this.form.controls.name.value,
+      };
+      try {
+        await this.gameService.joinGame(game);
+      } catch (e) {
+        console.error('Error joining the room', e);
         this.form.enable();
         this.isProcessing = false;
-      }, 3000);
+      }
     }
   }
 }

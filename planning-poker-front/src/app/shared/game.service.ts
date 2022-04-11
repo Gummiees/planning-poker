@@ -27,10 +27,31 @@ export class GameService {
     return this._joinGame$.asObservable();
   }
 
-  public joinGame(game: Game) {
+  public async joinGame(game: Game) {
+    try {
+      game.players = await this.ioSocketService.joinRoom(game.roomName, game.username);
+      this.setCurrentGame(game);
+      this._joinGame$.next(game);
+    } catch (e) {
+      throw e;
+    }
+  }
+
+  public async createGame(username: string) {
+    const roomName = await this.ioSocketService.createRoom(username);
+    const game: Game = {
+      username,
+      roomName,
+      players: [username],
+    };
+
     this.setCurrentGame(game);
-    this.ioSocketService.connect();
     this._joinGame$.next(game);
+    await this.router.navigate(['room', game.roomName]);
+  }
+
+  public async doesGameExist(room: string): Promise<boolean> {
+    return this.ioSocketService.doesRoomExist(room);
   }
 
   public exitGame() {
@@ -38,18 +59,6 @@ export class GameService {
     this._joinGame$.next(null);
     this.cookieService.set(COOKIE_NAME, '');
     this.ioSocketService.disconnect();
-  }
-
-  public async createGame(username: string) {
-    const roomName = await this.ioSocketService.createRoom();
-    const game: Game = {
-      username,
-      roomName,
-    };
-
-    this.setCurrentGame(game);
-    this._joinGame$.next(game);
-    await this.router.navigate(['room', game.roomName]);
   }
 
   private setCurrentGame(game: Game) {
