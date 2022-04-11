@@ -1,29 +1,31 @@
 // loading all dependencies
-var express = require('express');
-var http = require('http');
-var path = require('path');
-var socketIO = require('socket.io');
+const express = require('express');
+const path = require('path');
 
 //setting the port
-var port = 8080;
+const port = 8080;
+
+// instancing
+const app = express(); //default constructor
+app.set('port', port);
+//used 'public' folder to use external CSS and JS
+app.use('/public', express.static(__dirname + "/public"));
+//handling requests and responses by setting the Express framework
+app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public/index.html")));
+
+const http = require('http');
+const server = http.Server(app); //to launch Express
+server.listen(port, () => console.log("listening…"));
+
+const io = require('socket.io')(server, {
+    cors: {
+      origin: "http://localhost:4200",
+      methods: ["GET", "POST"]
+    }
+  });
 
 //initializing framework
 var players = {};
-
-// instancing
-var app = express(); //default constructor
-var server = http.Server(app); //to launch Express
-var io = socketIO(server); //passing 'server' so that it runs on IO server
-app.set('port', port);
-
-//used 'public' folder to use external CSS and JS
-app.use('/public', express.static(__dirname + "/public"));
-
-//port listening
-server.listen(port, () => console.log("listening…"));
-
-//handling requests and responses by setting the Express framework
-app.get("/", (req, res) => res.sendFile(path.join(__dirname, "public/index.html")));
 
 io.on('connection', (socket) => { //returns socket which is a piece of data that talks with server and client
     console.log("Someone has connected");
