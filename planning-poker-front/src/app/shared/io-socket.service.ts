@@ -39,6 +39,10 @@ export class IoSocketService {
     });
   }
 
+  public startGame(room: string) {
+    this.socket?.emit('startGame', room);
+  }
+
   public async doesRoomExist(room: string): Promise<boolean> {
     this.connectAnonymously();
     this.socket?.emit('doesRoomExist', room);

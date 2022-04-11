@@ -34,7 +34,15 @@ export class GameComponent implements OnDestroy {
   }
 
   public start() {
-    console.log('start');
+    this.gameService.startGame();
+  }
+
+  public isStartEnabled(): boolean {
+    return !!this.game && !!this.game.players && this.game.players.length > 2;
+  }
+
+  public getTooltip(): string {
+    return this.isStartEnabled() ? 'Start' : 'Not enough players';
   }
 
   public async copyToClipbard() {

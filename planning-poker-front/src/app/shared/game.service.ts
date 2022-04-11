@@ -47,11 +47,16 @@ export class GameService {
       room,
       isHost: true,
       players: [username],
+      status: 'waiting',
     };
 
     this.listenForPlayers();
     this.setCurrentGame(game);
     await this.router.navigate(['room', game.room]);
+  }
+
+  public startGame() {
+    this.ioSocketService.startGame(this.currentGame?.room ?? '');
   }
 
   public async doesGameExist(room: string): Promise<boolean> {

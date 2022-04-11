@@ -35,6 +35,7 @@ export class JoinComponent implements OnInit {
       const game: Game = {
         room: this.room || '',
         username: this.form.controls.name.value,
+        status: 'waiting',
       };
       try {
         await this.gameService.joinGame(game);

@@ -8,3 +8,30 @@ body {
   margin: 0;
   overflow-x: hidden;
 }
+
+app-game .mat-form-field-wrapper {
+  /* stylelint-disable-next-line number-max-precision */
+  margin-bottom: -1.34375em;
+
+  .mat-form-field-flex {
+    padding: 0 0 0 8px;
+    display: flex;
+    align-items: center;
+  }
+}
+
+button.mat-mini-fab {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  .mat-button-wrapper {
+    padding: 0;
+    line-height: auto;
+    height: 24px;
+
+    mat-icon {
+      vertical-align: initial;
+    }
+  }
+}
